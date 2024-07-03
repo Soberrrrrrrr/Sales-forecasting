@@ -17,14 +17,14 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     # Load the data
-    colgate = pd.read_csv(uploaded_file)
+    dataset = pd.read_csv(uploaded_file)
     # Convert the Date column to datetime format
-    colgate['Date'] = pd.to_datetime(colgate['Date'], dayfirst=True)
+    dataset['Date'] = pd.to_datetime(dataset['Date'], dayfirst=True)
     # Set the Date column as the index
-    colgate.set_index('Date', inplace=True)
+    dataset.set_index('Date', inplace=True)
 
     # Aggregate sales by month
-    monthly_sales = colgate['Sales(kg)']
+    monthly_sales = dataset['Sales']
 
     # Plot the aggregated sales data
     fig1, ax1 = plt.subplots(figsize=(10, 6))
@@ -41,7 +41,7 @@ if uploaded_file is not None:
     st.pyplot(fig1)
 
     # Aggregate sales by month
-    monthly_sales = colgate['Sales(kg)'].resample('M').sum()  # Assuming Sales(kg) is daily data, resampling to monthly sum
+    monthly_sales = dataset['Sales'].resample('M').sum()  # Assuming Sales is daily data, resampling to monthly sum
 
     # Seasonal Decomposition
     result = seasonal_decompose(monthly_sales, model='additive')
