@@ -11,6 +11,7 @@ import streamlit as st
 from dateutil.relativedelta import relativedelta
 
 st.title("Sales Forecasting")
+st.write("This forecasting model expects sales dataset with two columns Date and Sales with atleast three years of data to correctly capture seasonality and trend.")
 
 # File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
