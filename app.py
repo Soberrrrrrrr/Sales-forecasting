@@ -7,20 +7,21 @@ from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 from dateutil.relativedelta import relativedelta
 
-st.title("Sales Forecasting")
-st.write("This forecasting model expects sales dataset with three columns: Date, Sales, and Region, with at least three years of data to correctly capture seasonality and trend.")
+st.title("Sales Forecasting and Price Elasticity Analysis")
+st.write("This forecasting model expects a sales dataset with columns: Date, Sales, Region, and Sales_Price_Per_Unit, with at least three years of data to correctly capture seasonality and trend.")
+st.write("Note: Sales should be in tonnes")
 
 # Sample data
 sample_data = pd.DataFrame({
-    'Date': pd.date_range(start='2021-01-01', periods=3, freq='M'),
-    'Sales': [1000, 1500, 1300],
-    'Region': ['Region1'] * 3
+    'Date': pd.date_range(start='2021-01-01', periods=1, freq='M'),
+    'Sales': [1000],
+    'Region': ['Region1'] * 1,
+    'Sales_Price_Per_Unit': [10]
 })
 
-# display sample data
-st.write("Sample Data (Correct format with columns: Date, Sales, and Region):")
+# Display sample data
+st.write("Sample Data (Correct format with columns: Date, Sales, Region, and Sales_Price_Per_Unit):")
 st.write(sample_data)
-
 
 # File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -40,6 +41,7 @@ if uploaded_file is not None:
     # Filter data by the selected region
     regional_data = dataset[dataset['Region'] == selected_region]
     monthly_sales = regional_data['Sales'].resample('M').sum()
+    monthly_price = regional_data['Sales_Price_Per_Unit'].resample('M').mean()
     
     if not monthly_sales.empty:
         # Plot the aggregated sales data
@@ -122,9 +124,42 @@ if uploaded_file is not None:
         ax4.grid(True)
         fig4.tight_layout()
         st.pyplot(fig4)
+
+        # Calculate price elasticity
+        change_in_qt_demand = monthly_sales.diff()
+        change_in_price = monthly_price.diff()
+        avg_price = monthly_price.rolling(window=2).mean()
+        avg_quantity = monthly_sales.rolling(window=2).mean()
+        
+        price_elasticity = (change_in_qt_demand / change_in_price) * (avg_price / avg_quantity)
+        
+        # Combine all relevant metrics into a DataFrame
+        metrics_df = pd.DataFrame({
+            'Sales': monthly_sales,
+            'Sales_Price_Per_Unit': monthly_price,
+            'Change_in_Qty_Demand': change_in_qt_demand,
+            'Change_in_Price': change_in_price,
+            'Average_Price': avg_price,
+            'Average_Quantity': avg_quantity,
+            'Price_Elasticity': price_elasticity
+        })
+
+        st.write(f"Metrics for {selected_region}:")
+        st.write(metrics_df)
+
+        # Visualize the price elasticity
+        fig5, ax5 = plt.subplots(figsize=(10, 6))
+        ax5.plot(price_elasticity, label='Price Elasticity', color='g')
+        ax5.set_title(f'Price Elasticity Over Time for {selected_region}')
+        ax5.set_xlabel('Date')
+        ax5.set_ylabel('Price Elasticity')
+        ax5.legend()
+        ax5.grid(True)
+        fig5.tight_layout()
+        st.pyplot(fig5)
+        
     else:
         st.write("No data available for the selected region.")
-
 
 # Ensure 'monthly_sales' and 'forecast_df' are defined and not empty
 if 'monthly_sales' in locals() and 'forecast_df' in locals() and not monthly_sales.empty and not forecast_df.empty:

@@ -46,11 +46,11 @@ This Streamlit app allows you to forecast sales using time series analysis. The 
 
 ## Sample CSV Format
 
-The CSV file should contain at least two columns: `Date` and `Sales`. The `Date` column should be in a format that can be parsed by `pandas.to_datetime()`, and the `Sales` column should contain the sales data.
+The CSV file should contain at least three columns: `Date`, `Sales` and `Region`. The `Date` column should be in a format that can be parsed by `pandas.to_datetime()`, and the `Sales` column should contain the sales data.
 
 Example:
 ```csv
-Date,Sales(kg)
-01-01-2021,100
-02-01-2021,150
+Date,Sales,Region
+01-01-2021,100, R1
+02-01-2021,150, R2
 ...
